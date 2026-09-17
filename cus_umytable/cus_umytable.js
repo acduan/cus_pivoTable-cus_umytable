@@ -1,6 +1,6 @@
 /**
  * cus_umytable v1.0.1 - 原生JS透视表插件
- * @author duanZhongLin <acduan@163.com>
+ * @author dzl <acduan@163.com>
  * @license MIT
  * @description 基于App.vue全部功能，用原生JS实现的透视表插件
  * 
