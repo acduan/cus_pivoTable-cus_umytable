@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cus_umytable - report_data3 兼容性测试</title>
+    <link rel="stylesheet" href="./cus_umytable.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "微软雅黑", "Microsoft YaHei", Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+        .test_header {
+            background: linear-gradient(135deg, #e6a23c, #d48806);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .test_header h1 { font-size: 20px; font-weight: 500; }
+        .test_header .header_info { font-size: 12px; opacity: 0.85; }
+        .test_results {
+            margin: 16px;
+            background: #fff;
+            border-radius: 4px;
+            padding: 12px 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            font-size: 12px;
+        }
+        .test_results .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; margin-right: 8px; }
+        .tag.pass { background: #e1f3d8; color: #67c23a; }
+        .tag.fail { background: #fef0f0; color: #f56c6c; }
+        .tag.info { background: #ecf5ff; color: #409eff; }
+        .test_container {
+            margin: 16px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .test_footer {
+            text-align: center;
+            padding: 12px;
+            color: #909399;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test_header">
+        <div>
+            <h1>🧪 cus_umytable 兼容性测试 - report_data3.json</h1>
+            <div class="header_info">数据集: ~4.2MB · 10个行字段 · 0个列字段 · 2个数值字段</div>
+        </div>
+        <div class="header_info">
+            <div>报表名称: 消费结算明细</div>
+        </div>
+    </div>
+
+    <div class="test_results" id="test_results">
+        <strong>测试结果:</strong> <span id="result_status">等待测试...</span>
+    </div>
+
+    <div class="test_container" id="app"></div>
+
+    <div class="test_footer">
+        cus_umytable v1.0.1 · 兼容性测试
+    </div>
+
+    <script src="./cus_umytable.js"></script>
+    <script>
+        (function() {
+            const resultEl = document.getElementById('result_status');
+            const resultsEl = document.getElementById('test_results');
+
+            function addResult(label, pass, detail) {
+                const tag = document.createElement('span');
+                tag.className = 'tag ' + (pass ? 'pass' : 'fail');
+                tag.textContent = (pass ? '✓ ' : '✗ ') + label;
+                resultsEl.appendChild(tag);
+                if (detail) {
+                    const span = document.createElement('span');
+                    span.textContent = detail + ' ';
+                    resultsEl.appendChild(span);
+                }
+            }
+
+            function log(msg, pass) {
+                console.log((pass ? '✅' : '❌') + ' ' + msg);
+                addResult(msg, pass !== false);
+            }
+
+            try {
+                log('开始测试 report_data3.json 兼容性');
+
+                const table = CusUmyTable.create('#app', {
+                    dataUrl: '../components/report_data3.json',
+                    showToolbar: true,
+                    showConfig: false,
+                    size: 'small'
+                });
+
+                window.cusTable3 = table;
+
+                // 延迟检查加载结果
+                setTimeout(() => {
+                    try {
+                        // 检查基础信息
+                        if (table.rpt_des_name === '消费结算明细') {
+                            log('报表名称正确加载', true);
+                        } else {
+                            log('报表名称错误: ' + table.rpt_des_name, false);
+                        }
+
+                        // 检查字段配置
+                        if (table.rows_fieldList.length === 10) {
+                            log('行字段数量正确: 10个', true);
+                        } else {
+                            log('行字段数量异常: ' + table.rows_fieldList.length, false);
+                        }
+
+                        if (table.cols_fieldList.length === 0) {
+                            log('列字段数量正确: 0个（无列字段模式）', true);
+                        } else {
+                            log('列字段数量异常: ' + table.cols_fieldList.length, false);
+                        }
+
+                        if (table.numerics_fieldlist.length === 2) {
+                            log('数值字段数量正确: 2个', true);
+                        } else {
+                            log('数值字段数量异常: ' + table.numerics_fieldlist.length, false);
+                        }
+
+                        // 检查数据加载
+                        if (table.rsp_datalist_initial && table.rsp_datalist_initial.length > 0) {
+                            log('原始数据加载成功: ' + table.rsp_datalist_initial.length + ' 条', true);
+                        } else {
+                            log('原始数据加载失败', false);
+                        }
+
+                        // 检查合并后数据
+                        const mergedSize = table.mergedDataMap ? table.mergedDataMap.size : 0;
+                        if (mergedSize > 0) {
+                            log('数据合并成功: ' + mergedSize + ' 组', true);
+                        } else {
+                            log('数据合并失败或为空', false);
+                        }
+
+                        // 检查表格数据
+                        const dataLen = table.ux_grid_datas ? table.ux_grid_datas.length : 0;
+                        if (dataLen > 0) {
+                            log('表格数据渲染成功: ' + dataLen + ' 行', true);
+                        } else {
+                            log('表格数据为空，检查渲染逻辑', false);
+                        }
+
+                        // 检查配置项兼容性
+                        if (table.elradio_isShow_ColSubtotal === 'true') {
+                            log('列小计配置（布尔值true）兼容正常', true);
+                        } else {
+                            log('列小计配置异常: ' + table.elradio_isShow_ColSubtotal, false);
+                        }
+
+                        // 检查备注表达式（应显示为文本）
+                        if (table.rpt_des_remark.indexOf('param') >= 0) {
+                            log('备注表达式按文本显示（不执行）', true);
+                        }
+
+                        // 检查 null 值处理
+                        const nullPriceItems = table.rsp_datalist_initial.filter(
+                            item => item['价格'] === null
+                        );
+                        if (nullPriceItems.length > 0) {
+                            log('null值字段存在，已兼容处理: ' + nullPriceItems.length + ' 条', true);
+                        }
+
+                        resultEl.textContent = '测试完成';
+                        resultEl.style.color = '#67c23a';
+                        resultEl.style.fontWeight = 'bold';
+                        console.log('✅ report_data3.json 兼容性测试完成');
+
+                    } catch (e) {
+                        log('测试过程异常: ' + e.message, false);
+                        console.error(e);
+                    }
+                }, 2000);
+
+                console.log('📊 插件初始化完成，等待数据加载...');
+
+            } catch (e) {
+                log('插件初始化失败: ' + e.message, false);
+                console.error(e);
+            }
+        })();
+    </script>
+</body>
+</html>

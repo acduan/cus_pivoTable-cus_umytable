@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cus_umytable - 原生JS透视表演示（压缩版）</title>
+    <link rel="stylesheet" href="./cus_umytable.min.css?v=20260917">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "微软雅黑", "Microsoft YaHei", Arial, sans-serif;
+            background: #fff;
+            min-height: 100vh;
+        }
+        .demo_container {
+            margin: 0;
+            background: #fff;
+        }
+        .demo_footer {
+            text-align: center;
+            padding: 12px;
+            color: #909399;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo_container" id="app"></div>
+
+    <div class="demo_footer">
+        cus_umytable v1.0.1 (min) · MIT License · <a href="https://github.com/acduan/cus_pivoTable-cus_umytable" target="_blank">GitHub</a>
+    </div>
+
+    <script src="./cus_umytable.min.js?v=20260917"></script>
+    <script>
+        (function() {
+            // 初始化透视表（dist 目录下数据路径上移一级）
+            const table = CusUmyTable.create('#app', {
+                dataUrl: '../../components/report_data2.json',
+                showToolbar: true,
+                showConfig: true,
+                size: 'small'
+            });
+
+            // 暴露到全局方便调试
+            window.cusTable = table;
+
+            console.log('✅ cus_umytable 透视表插件已初始化（min 版）');
+        })();
+    </script>
+</body>
+</html>

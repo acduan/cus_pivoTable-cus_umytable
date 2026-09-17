@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cus_umytable - 原生JS透视表演示</title>
+    <link rel="stylesheet" href="./cus_umytable.css?v=20260916c">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "微软雅黑", "Microsoft YaHei", Arial, sans-serif;
+            background: #fff;
+            min-height: 100vh;
+        }
+        .demo_container {
+            margin: 0;
+            background: #fff;
+        }
+        .demo_footer {
+            text-align: center;
+            padding: 12px;
+            color: #909399;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo_container" id="app"></div>
+
+    <div class="demo_footer">
+        cus_umytable v1.0.1 · MIT License · <a href="https://github.com/acduan/cus_pivoTable-cus_umytable" target="_blank">GitHub</a>
+    </div>
+
+    <script src="./cus_umytable.js?v=20260916e"></script>
+    <script>
+        (function() {
+            // 初始化透视表
+            const table = CusUmyTable.create('#app', {
+                dataUrl: '../components/report_data2.json',
+                showToolbar: true,
+                showConfig: true,    // 默认展开配置面板以匹配截图
+                size: 'small'
+            });
+
+            // 暴露到全局方便调试
+            window.cusTable = table;
+
+            /*
+			// 截图匹配：覆盖标题/日期为"运营数据汇总"+日期范围
+            table.on && table.on('loaded', function() {
+                table.rpt_des_name = '运营数据汇总';
+                table.rpt_des_remark = '2026-07-12 00:00:00至2026-07-22 23:59:59';
+                table._renderTitle();
+            });
+            // 兜底：loadData 是 async，直接延时一次
+            setTimeout(function() {
+                if (table.rsp_datalist && table.rsp_datalist.length) {
+                    table.rpt_des_name = '运营数据汇总';
+                    table.rpt_des_remark = '2026-07-12 00:00:00至2026-07-22 23:59:59';
+                    table._renderTitle();
+                }
+            }, 800);
+			*/
+
+            // 测试用：URL 含 ?scroll=Y 时自动滚动表体
+            try {
+                var m = location.search.match(/[?&]scroll=(\d+)/);
+                if (m) {
+                    setTimeout(function() {
+                        var w = document.querySelector('.cus_umytable_table_wrapper');
+                        if (w) w.scrollTop = parseInt(m[1]);
+                    }, 1500);
+                }
+                var dump = location.search.match(/[?&]dump=1/);
+                if (dump) {
+                    setTimeout(function() {
+                        var thead = document.querySelector('.cus_umytable_table thead');
+                        console.log('THEAD HTML:', thead ? thead.outerHTML.substring(0, 2000) : 'none');
+                        var r1 = document.querySelector('.cus_umytable_table thead tr:first-child');
+                        if (r1) {
+                            var h = r1.offsetHeight;
+                            console.log('R1 height:', h);
+                            document.title = 'R1H=' + h;
+                        }
+                        // dump computed top of each th
+                        var ths = document.querySelectorAll('.cus_umytable_table thead th');
+                        ths.forEach(function(th, i) {
+                            var cs = getComputedStyle(th);
+                            console.log('TH', i, 'top=' + cs.top, 'pos=' + cs.position, 'h=' + th.offsetHeight, 'text=' + th.textContent.trim().substring(0,10));
+                        });
+                        // dump wrapper style
+                        var w = document.querySelector('.cus_umytable_wrapper');
+                        if (w) {
+                            var cs = getComputedStyle(w);
+                            console.log('WRAPPER inline style:', w.style.cssText);
+                            console.log('WRAPPER --cus-r1h:', cs.getPropertyValue('--cus-r1h'));
+                            console.log('WRAPPER --cus-r1r2h:', cs.getPropertyValue('--cus-r1r2h'));
+                            document.title += ' r1h=' + cs.getPropertyValue('--cus-r1h') + ' r1r2h=' + cs.getPropertyValue('--cus-r1r2h');
+                        }
+                        // manually call sync
+                        if (window.cusTable && window.cusTable._syncStickyHeaderOffset) {
+                            console.log('calling sync manually');
+                            window.cusTable._syncStickyHeaderOffset();
+                            setTimeout(function() {
+                                var w2 = document.querySelector('.cus_umytable_wrapper');
+                                if (w2) {
+                                    document.title += ' | after=' + w2.style.getPropertyValue('--cus-r1h') + ',' + w2.style.getPropertyValue('--cus-r1r2h');
+                                }
+                            }, 200);
+                        }
+                    }, 3000);
+                }
+            } catch(e) { console.error(e); }
+
+            console.log('✅ cus_umytable 透视表插件已初始化');
+            console.log('   - 支持汇总/明细两种表类型');
+            console.log('   - 支持网格/树状两种表样式');
+            console.log('   - 支持拖拽配置字段(行/列/数值/隐藏)');
+            console.log('   - 支持筛选、排序、行小计、列小计、列总计');
+            console.log('   - 支持导出Excel(CSV)、打印');
+            console.log('   - 支持偏好保存/加载/导入/导出');
+            console.log('   - 支持千分位、小数位、字号、列冻结等格式设置');
+            console.log('   - 零依赖，纯原生JavaScript实现');
+        })();
+    </script>
+</body>
+</html>
