@@ -90,4 +90,4 @@ Chrome / Edge / Firefox 等现代浏览器。
 
 ## 📄 License
 
-[MIT](https://opensource.org/licenses/MIT) © duanZhongLin
+[MIT](https://opensource.org/licenses/MIT)
